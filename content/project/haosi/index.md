@@ -3,12 +3,13 @@ title: "Heterogeneous Agent Optimal Savings I"
 subtitle: "Linear Interpolation"
 summary: "Hugget (1993) with Linear Interpolation"
 authors: []
+date: 2019-05-01
 tags: ["simple-hacs"]
 categories: []
 ---
 The Huggett (1993) model is an ideal starting point for developing heterogeneous agent solution algorithms. This notebook presents standard solution algorithms with a few extensions.
 
-First, I import relevant python libraries that will be useful in my calculations. 
+First, I import relevant python libraries that will be useful in my calculations.
 - `time:` enables time keeping
 - `matplotlib:` graph plotting library
 - `numpy:` numerical library for working with arrays and vectorized functions
@@ -73,9 +74,9 @@ The environment is composed of ex-ante identical households with a labor income 
 
 The first step in solving the model is creating a class object that contains the model parameters. I take advantage of python's object oriented programming to create a class of models named HAOS (heterogeneous agent optimal savings) that takes in the following parameters:
 
-- $\sigma \ge 1$: CRRA parameter of relative risk aversion 
+- $\sigma \ge 1$: CRRA parameter of relative risk aversion
 - $u$: jitted function to override the CRRA utility form, useful for different utility specifications
-- $\beta$: household discount factor for future utility of consumption 
+- $\beta$: household discount factor for future utility of consumption
 - $e$: the set of possible labor income endowments
 - $\pi$: the transition probability matrix for the Markov chain process of labor income
 - $\texttt{abounds}$: the range of bonds over which I solve the value, policy, and distribution functions, where the lower bound serves as the credit limit
@@ -145,7 +146,7 @@ I use a log-spaced grid to solve the value and policy functions, expecting more 
 
 To solve the value function, I use value function iteration (VFI) and the $T$ operator, the properties of which are well established in dynamic programming. To avoid having to pass all the model parameters every time I use the T operator, I use a function factory as described below.
 
-The first component is the $\texttt{objective}$ function, which evaluates the value function at a given proposed next period bond choice, given a price of bonds $q$ and a total period budget $y$. The $T$ operator then uses a golden section search algorithm with inverse parabolic interpolation (Brent, 1973) to evaluate the value function at a range of next period bond choices to find a maximum. 
+The first component is the $\texttt{objective}$ function, which evaluates the value function at a given proposed next period bond choice, given a price of bonds $q$ and a total period budget $y$. The $T$ operator then uses a golden section search algorithm with inverse parabolic interpolation (Brent, 1973) to evaluate the value function at a range of next period bond choices to find a maximum.
 
 Thus, the $T$ operator takes an initial value function defined over the labor income and the bond grid points to produce a new value function. This operator is designed to allow skipping of the maximization search as described in (Judd, 1998). If I provide an already solved policy function $g$, the operator skips the max search and just evaluates the value of the current state. This option will be used later to speed up VFI. The $T$ operator is as follows:
 
@@ -305,7 +306,7 @@ To start calculation, I instanciate a HAOS object called model with default para
 model = HAOS()
 ```
 
-Now, to solve for the value function, I create a $T$ operator for the model and use parallel computation. 
+Now, to solve for the value function, I create a $T$ operator for the model and use parallel computation.
 
 
 ```python
@@ -333,10 +334,10 @@ solve_value(model, solver, 1.0, skip_policy=True)
     -- Policy error at iteration 166 is 2.6750e-10.
     Value error at iteration 1091 is 9.9891e-05.
     -- Policy error at iteration 257 is 2.1690e-07.
-    
+
     Value converged in 1091 iterations and 0.1701 seconds.
-    
-    
+
+
 
 
 ```python
@@ -347,7 +348,7 @@ plt.plot(model.agrid, model.v.T);
 ![png](index_files/index_21_0.png)
 
 
-The value function converges quickly, and I can plot the conditional value function based on labor income draw above. 
+The value function converges quickly, and I can plot the conditional value function based on labor income draw above.
 
 I have assumed that parallel computation is more efficient, but this is not always the case, as parallel computing usually requires some overhead computation time and memory, as well as good programming decisions. To check if indeed parallel computation is desirable, I can create a $T$ operator that does not use parallelization, and compare computation time.
 
@@ -363,7 +364,7 @@ solve_value(model, solver, 1.0, skip_policy=True, verbose=False)
 ```
 
     170 ms ± 6.56 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
-    
+
 
 
 ```python
@@ -372,7 +373,7 @@ solve_value(model, serial_solver, 1.0, skip_policy=True, verbose=False)
 ```
 
     151 ms ± 7 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-    
+
 
 As I see above, parallel computation is on average a few microseconds faster (this is no longer the case on my upgraded computer), and I believe in more complex models the advantages are more significant. This result varies depending on my hardware and other processes going on in my system.
 
@@ -520,10 +521,10 @@ solve_distribution(model, simulator)
     Distribution error at iteration 50 is 1.3703e-03.
     Distribution error at iteration 75 is 1.0302e-04.
     Distribution error at iteration 91 is 9.8976e-06.
-    
+
     Distribution converged in 91 iterations and 0.0080 seconds.
-    
-    
+
+
 
 
 ```python
@@ -643,55 +644,55 @@ solve_model(model, solver, simulator, aggregator, verbose="summary")
 ```
 
     Evaluating solution at q = 0.993220.
-    
+
     The aggregate balance for q = 0.993220 is A = 2.052284.
-    
+
     -------------------------------------------------------
-    
+
     Evaluating solution at q = 1.006826.
-    
+
     The aggregate balance for q = 1.006826 is A = -1.600514.
-    
+
     -------------------------------------------------------
-    
+
     Evaluating solution at q = 1.000865.
-    
+
     The aggregate balance for q = 1.000865 is A = -0.765006.
-    
+
     -------------------------------------------------------
-    
+
     Evaluating solution at q = 0.998150.
-    
+
     The aggregate balance for q = 0.998150 is A = -0.062666.
-    
+
     -------------------------------------------------------
-    
+
     Evaluating solution at q = 0.997858.
-    
+
     The aggregate balance for q = 0.997858 is A = 0.040579.
-    
+
     -------------------------------------------------------
-    
+
     Evaluating solution at q = 0.997970.
-    
+
     The aggregate balance for q = 0.997970 is A = 0.000295.
-    
+
     -------------------------------------------------------
-    
+
     Evaluating solution at q = 0.997972.
-    
+
     The aggregate balance for q = 0.997972 is A = -0.000296.
-    
+
     -------------------------------------------------------
-    
+
     Evaluating solution at q = 0.997971.
-    
+
     The aggregate balance for q = 0.997971 is A = 0.000000.
-    
+
     -------------------------------------------------------
-    
+
     Model converged in 8 iterations and 2.0685 seconds.
-    
+
 
 
 ```python
@@ -708,7 +709,7 @@ solve_model(model, solver, simulator, aggregator, skip_policy=True, verbose=Fals
 ```
 
     Model converged in 8 iterations and 1.4049 seconds.
-    
+
 
 
 ```python
@@ -724,7 +725,7 @@ solve_model(
 ```
 
     Model converged in 10 iterations and 0.7332 seconds.
-    
+
 
 ## References
 
