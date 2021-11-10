@@ -4,6 +4,7 @@ subtitle: "Linear Interpolation"
 summary: "Hugget (1993) with Linear Interpolation"
 authors: []
 date: 2019-05-01
+lastmod: 2020-05-01
 tags: ["simple-hacs"]
 categories: []
 ---
